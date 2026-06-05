@@ -4,6 +4,7 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import StreamingResponse
 from bson.objectid import ObjectId
 import bson.errors
+from fastapi.middleware.cors import CORSMiddleware
 
 bucket = None
 
@@ -17,6 +18,13 @@ async def lifespan(app):
     pass
 
 app = FastAPI(lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # tighten this down in production
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # ---- Define Routes Here ----
 @app.post("/image/")
