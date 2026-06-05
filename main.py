@@ -5,6 +5,7 @@ from fastapi.responses import StreamingResponse
 from bson.objectid import ObjectId
 import bson.errors
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import PlainTextResponse
 
 bucket = None
 
@@ -21,13 +22,13 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # tighten this down in production
+    allow_origins=["*"],  
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # ---- Define Routes Here ----
-@app.post("/image/")
+@app.post("/image/", response_class=PlainTextResponse)
 async def upload_image(file: UploadFile = File(...)):
     file_bytes = await file.read()
     id = await bucket.upload_from_stream(file.filename, file_bytes)
@@ -35,8 +36,6 @@ async def upload_image(file: UploadFile = File(...)):
 
 @app.get("/image/{id}")
 async def get_image(id: str):
-    
-    # error handling for incorrect phrase_ids 
     try:
         object_id = ObjectId(id)
     except bson.errors.InvalidId:
